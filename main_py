@@ -1,0 +1,48 @@
+import os
+import time
+from telegram import Update
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+
+# TOKENNI TO'G'RI YOZING
+TOKEN = "8637820333:AAFkZ6NO2rz-uF0FGde2KPim33k25RkFzYY"
+
+# Oddiy baza (faqat bot ishlab turganda saqlanadi)
+users = {}
+FREE_LIMIT = 5
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if user_id not in users:
+        users[user_id] = {
+            "balance": 8000000,
+            "used": 0,
+            "date": time.strftime("%Y-%m-%d"),
+            "premium": False
+        }
+    await update.message.reply_text(
+        "🤖 PTB Botga xush kelibsiz!\n\n"
+        "🎁 BONUS: 8,000,000\n"
+        "💰 /balance\n"
+        "🤖 /create"
+    )
+
+async def balance(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    u = users.get(user_id)
+    if not u:
+        await update.message.reply_text("Avval /start bosing")
+        return
+    await update.message.reply_text(f"💰 Balans: {u['balance']}")
+
+async def echo(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("⌨️ Buyruqlar: /create, /balance, /premium")
+
+if __name__ == '__main__':
+    app = ApplicationBuilder().token(TOKEN).build()
+    
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("balance", balance))
+    app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), echo))
+    
+    print("Bot ishga tushdi...")
+    app.run_polling()
